@@ -14,9 +14,11 @@
 .
 ├── configs                 # Config files in .json format
 ├── datasets                # Datasets and methods to handle them as python classes
+├── datasets                # Raw data folder
 ├── models                  # Models defined as python classes
 ├── trainer                 # Responsible to get data and model, and handle actual training
 ├── utils                   # Parse CLI and config file plus training utilities
+├── general_utils.py        # General utils beyond training
 ├── main.py                 # Launch your training instance
 └── README.md
 ```
