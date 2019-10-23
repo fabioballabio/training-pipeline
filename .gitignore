@@ -2,6 +2,8 @@
 /checkpoints
 /runs
 /data/kitti
+/data/COCO
+
 
 
 # Ignore Mac DS_Store files
