@@ -1,0 +1,18 @@
+{
+    "input_data": {
+        "data_path": "./data/kitti",
+        "dataset": "Kitti"
+    },
+    "training": {
+        "model": "TinyAlexNet",
+        "epochs": 100,
+        "batch_size": 32,
+        "loss": "classification",
+        "optimizer": "adam",
+        "learning_rate": 0.001
+    },
+    "output_data": {
+        "model_save_path": "./checkpoints",
+        "logs_path": "./runs"
+    }
+}
