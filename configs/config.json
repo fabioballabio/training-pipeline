@@ -1,6 +1,6 @@
 {
     "input_data": {
-        "data_path": "./data/kitti",
+        "data_path": "./data/kitti_toy",
         "dataset": "Kitti"
     },
     "training": {
