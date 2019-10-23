@@ -1,6 +1,7 @@
 # Don't load models and log which are large files
 /checkpoints
 /runs
+/data/kitti
 
 
 # Ignore Mac DS_Store files
