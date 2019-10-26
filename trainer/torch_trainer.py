@@ -8,12 +8,7 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import random_split
 from general_utils import TorchDataset
-from utils.training_utils import (
-    get_metrics,
-    format_time,
-    count_parameters,
-    get_device,
-)
+from utils.training_utils import get_metrics, format_time, count_parameters, get_device
 from general_utils import precision, recall, accuracy
 import time
 
@@ -68,9 +63,7 @@ class TorchTrainer:
             self.optimizer = optim.rmsprop(self.model.parameters(), lr=self.lr)
 
         self.log_dir = os.path.join(log_dir, self.model.__class__.__name__)
-        self.save_dir = (
-            os.path.join(save_dir, self.model.__class__.__name__) + ".pth"
-        )
+        self.save_dir = os.path.join(save_dir, self.model.__class__.__name__) + ".pth"
         self.writer = SummaryWriter(log_dir=self.log_dir)
 
     def _training_step(self, X, y):
@@ -113,9 +106,7 @@ class TorchTrainer:
         for metric in supported_metrics:
             if metric in metrics.keys():
                 scalar = metrics[metric.lower()]
-                log_label = os.path.join(
-                    metric.capitalize(), stage.capitalize()
-                )
+                log_label = os.path.join(metric.capitalize(), stage.capitalize())
                 self.writer.add_scalar(log_label, scalar, epoch)
 
         self.writer.flush()
@@ -127,9 +118,7 @@ class TorchTrainer:
         # processed
         log_idxs = []
         while len(log_idxs) != n_imgs:
-            log_idxs = np.unique(
-                np.random.randint(0, y_hat.size()[0], size=n_imgs)
-            )
+            log_idxs = np.unique(np.random.randint(0, y_hat.size()[0], size=n_imgs))
         # Display each of the n images in tensorboard inserting text
         # showing how much the model is confident about predicting
         # a car in the image
@@ -159,10 +148,6 @@ class TorchTrainer:
 
     def start_training(self):
         """ Starts training the model. """
-        # Make training reproducible
-        if str(self.device) == "cuda":
-            torch.backend.cudnn.deterministic = True
-            torch.backend.cudnn.benchmark = True
 
         # Get some infos about image we will deal with, if code get split up,
         # it would be no more required here
@@ -176,7 +161,7 @@ class TorchTrainer:
             round((1 - val_frac) * len(self.dataset)),
             round(val_frac * len(self.dataset)),
         ]
-        torch.manual_seed(0)
+
         train_dataset, val_dataset = random_split(self.dataset, lenghts)
         # Get loaders to shuffle, batch and lazily load data
         train_data = DataLoader(
@@ -234,9 +219,7 @@ class TorchTrainer:
                 self.optimizer.step()
 
             # Validation loop
-            if (
-                epoch % val_step == 0 and epoch != 0
-            ) or epoch == self.epochs - 1:
+            if (epoch % val_step == 0 and epoch != 0) or epoch == self.epochs - 1:
                 self.model.eval()
                 val_losses = []
                 val_preds = []
@@ -246,9 +229,7 @@ class TorchTrainer:
                     with torch.no_grad():
                         X_val, y_val = val_batch
                         # moving from NHWC convention to NCHW
-                        X_val = (
-                            X_val.permute(0, 3, 1, 2).float().to(self.device)
-                        )
+                        X_val = X_val.permute(0, 3, 1, 2).float().to(self.device)
                         # reshape to (N_BATCHES, N_CLASSES)
                         y_val = y_val.view(-1, 1).float().to(self.device)
                         val_ground_truth.extend(y_val.tolist())
@@ -265,9 +246,7 @@ class TorchTrainer:
                 val_accuracy = accuracy(val_tp, val_fp, val_fn, val_tn)
                 val_precision = precision(val_tp, val_fp)
                 val_recall = recall(val_tp, val_fn)
-                self.writer.add_scalar(
-                    "Loss/val", np.array(val_losses).mean(), epoch
-                )
+                self.writer.add_scalar("Loss/val", np.array(val_losses).mean(), epoch)
                 self.writer.add_scalar("Accuracy/val", val_accuracy, epoch)
                 self.writer.add_scalar("Precision/val", val_precision, epoch)
                 self.writer.add_scalar("Recall/val", val_recall, epoch)
@@ -278,9 +257,7 @@ class TorchTrainer:
                 # processed
                 log_idxs = []
                 while len(log_idxs) != 5:
-                    log_idxs = np.unique(
-                        np.random.randint(0, y.size()[0], size=5)
-                    )
+                    log_idxs = np.unique(np.random.randint(0, y.size()[0], size=5))
                 # Display each of the 5 images in tensorboard inserting text
                 # showing how much the model is confident about predicting
                 # a car in the image
@@ -312,18 +289,14 @@ class TorchTrainer:
             train_accuracy = accuracy(tp, fp, fn, tn)
             train_precision = precision(tp, fp)
             train_recall = recall(tp, fn)
-            self.writer.add_scalar(
-                "Loss/train", np.array(losses).mean(), epoch
-            )
+            self.writer.add_scalar("Loss/train", np.array(losses).mean(), epoch)
             self.writer.add_scalar("Accuracy/train", train_accuracy, epoch)
             self.writer.add_scalar("Precision/train", train_precision, epoch)
             self.writer.add_scalar("Recall/train", train_recall, epoch)
             self.writer.flush()
             epoch_end = time.time()
             # Printing on console training results
-            if (
-                epoch % val_step == 0 and epoch != 0
-            ) or epoch == self.epochs - 1:
+            if (epoch % val_step == 0 and epoch != 0) or epoch == self.epochs - 1:
                 print(
                     "EPOCH {} - "
                     "Train Loss: {:.4f} - "
@@ -356,6 +329,8 @@ class TorchTrainer:
         self.writer.close()
 
         # saving just model params (recommended pytorch way)
+        if not os.path.exists(self.save_dir):
+            os.mkdir(self.save_dir)
         torch.save(self.model.state_dict(), self.save_dir)
 
         end = time.time()
